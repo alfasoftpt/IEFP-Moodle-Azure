@@ -393,11 +393,6 @@ EOF
             return 404;
         }
 
-  location = /login/index.php {
-    auth_basic           "Administrator’s Area";
-    auth_basic_user_file /moodle/html/moodle/.htpasswd;
-  }
-
 	location / {
 		try_files \$uri \$uri/index.php?\$query_string;
 	}
