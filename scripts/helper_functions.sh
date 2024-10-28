@@ -11,8 +11,10 @@ function get_setup_params_from_configs_json
     # sudo apt-get -y update
     # sudo apt-get -y install jq
 
+    # Modified by Rafael
     # Added curl command to download jq.
-    curl https://stedolan.github.io/jq/download/linux64/jq > /usr/bin/jq && chmod +x /usr/bin/jq
+    # Fixing the download of jq
+    wget https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 -O /usr/bin/jq && chmod +x /usr/bin/jq
 	
     # Wait for the cloud-init write-files user data file to be generated (just in case)
     local wait_time_sec=0
