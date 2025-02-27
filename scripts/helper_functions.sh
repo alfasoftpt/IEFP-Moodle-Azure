@@ -6,12 +6,11 @@ function get_setup_params_from_configs_json
 {
     local configs_json_path=${1}    # E.g., /var/lib/cloud/instance/moodle_on_azure_configs.json
 
-    # (dpkg -l jq &> /dev/null) || (apt -y update; apt -y install jq)
-    # sudo add-apt-repository universe
-    # sudo apt-get -y update
-    # sudo apt-get -y install jq
-
     # Modified by Rafael
+    # # (dpkg -l jq &> /dev/null) || (apt -y update; apt -y install jq)
+    # # sudo add-apt-repository universe
+    # # sudo apt-get -y update
+    # # sudo apt-get -y install jq
     # Added curl command to download jq.
     # Fixing the download of jq
     wget https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64 -O /usr/bin/jq && chmod +x /usr/bin/jq
@@ -70,7 +69,13 @@ function get_setup_params_from_configs_json
     export nfsByoIpExportPath=$(echo $json | jq -r .fileServerProfile.nfsByoIpExportPath)
     export storageAccountType=$(echo $json | jq -r .moodleProfile.storageAccountType)
     export fileServerDiskSize=$(echo $json | jq -r .fileServerProfile.fileServerDiskSize)
-    export phpVersion=$(echo $json | jq -r .phpProfile.phpVersion)
+    
+    # Modified by Rafael
+    # # export phpVersion=$(echo $json | jq -r .phpProfile.phpVersion)
+    # It is not possible to change values after deployment
+    # https://github.com/Azure/Moodle/issues/234
+    export phpVersion="8.0"
+
     export isMigration=$(echo $json | jq -r .moodleProfile.isMigration)
 }
 
@@ -426,8 +431,9 @@ if [ -f "$SERVER_TIMESTAMP_FULLPATH" ]; then
       truncate -s 0 $SYNC_LOG_FULLPATH
     fi
     echo \$(date +%Y%m%d%H%M%S) >> $SYNC_LOG_FULLPATH
-    rsync -av --delete /moodle/html/moodle /var/www/html >> $SYNC_LOG_FULLPATH
-    #*** Rafael Silva <rafael.silva@alfasoft.pt> -> Add prune cache
+    # Modified by Rafael
+    # Add prune cache
+    # rsync -av --delete /moodle/html/moodle /var/www/html >> $SYNC_LOG_FULLPATH
     /etc/init.d/varnish restart
     #***
   fi

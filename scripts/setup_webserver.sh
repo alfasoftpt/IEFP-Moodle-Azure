@@ -65,6 +65,9 @@ check_fileServerType_param $fileServerType
 
   # install pre-requisites including VARNISH and PHP-FPM
   export DEBIAN_FRONTEND=noninteractive
+  
+  # Modified by Rafael
+  # That php-json is not required in php 8 as it is now built-in to php
   apt-get --yes \
     --no-install-recommends \
     -qq -o=Dpkg::Use-Pty=0 \
@@ -96,7 +99,6 @@ check_fileServerType_param $fileServerType
     graphviz \
     aspell \
     php$phpVersion-soap \
-    php$phpVersion-json \
     php$phpVersion-redis \
     php$phpVersion-bcmath \
     php$phpVersion-gd \
@@ -107,7 +109,8 @@ check_fileServerType_param $fileServerType
     php$phpVersion-xml \
     php$phpVersion-bz2
 
-  # Rafael Silva <rafael.silva@alfasoft.pt> -> Install PT_PT & PT_BR locales
+  # Modified by Rafael
+  # Install PT_PT & PT_BR locales
   export DEBIAN_FRONTEND=noninteractive
   apt-get --yes --no-install-recommends -qq -o=Dpkg::Use-Pty=0 -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install language-pack-pt
 
@@ -170,7 +173,8 @@ EOF
   # PHP Version
   PhpVer=$(get_php_version)
 
-  # Rafael Silva <rafael.silva@alfasoft.pt> -> Change to NFS with HA
+  # Modified by Rafael
+  # Change to NFS with HA  
   configure_nfs_client_and_mount 192.168.36.134 /moodle /moodle
 
   # Configure syslog to forward
@@ -288,9 +292,11 @@ EOF
       setup_html_local_copy_cron_job
     fi
     if [ "$fileServerType" = "nfs" -o "$fileServerType" = "nfs-ha" -o "$fileServerType" = "nfs-byo" -o "$fileServerType" = "gluster" ]; then
-      mkdir -p /var/www/html/moodle
-      rsync -a /moodle/html/moodle/ $htmlRootDir/
-      chown www-data:www-data -R $htmlRootDir && sync
+      # Modified by Rafael
+      # No need, as everything is on the NFS
+      # mkdir -p /var/www/html/moodle
+      # rsync -a /moodle/html/moodle/ $htmlRootDir/
+      # chown www-data:www-data -R $htmlRootDir && sync
       setup_html_local_copy_cron_job
     fi
   fi
@@ -403,7 +409,8 @@ upstream backend {
         server unix:/run/php/php${PhpVer}-fpm-backup.sock backup;
 }
 
-# Rafael Silva <rafael.silva@alfasoft.pt> -> Endpoint health probe
+# Modified by Rafael
+# Endpoint health probe
 server {
   listen 82 default;
   server_name _;
@@ -482,11 +489,11 @@ EOF
    sed -i "s/max_execution_time.*/max_execution_time = 18000/" $PhpIni
    sed -i "s/max_input_time.*/max_input_time = 600/" $PhpIni
    
-   #*** Rafael Silva <rafael.silva@alfasoft.pt> -> Change max_input_vars, upload_max_filesize and post_max_size
+   # Modified by Rafael
+   # Change max_input_vars, upload_max_filesize and post_max_size
    sed -i "s/;max_input_vars.*/max_input_vars = 100000/" $PhpIni
    sed -i "s/upload_max_filesize.*/upload_max_filesize = 1056M/" $PhpIni
    sed -i "s/post_max_size.*/post_max_size = 1056M/" $PhpIni
-   #***
 
    sed -i "s/;opcache.use_cwd.*/opcache.use_cwd = 1/" $PhpIni
    sed -i "s/;opcache.validate_timestamps.*/opcache.validate_timestamps = 1/" $PhpIni
