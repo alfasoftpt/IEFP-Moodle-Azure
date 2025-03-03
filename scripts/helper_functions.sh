@@ -431,9 +431,9 @@ if [ -f "$SERVER_TIMESTAMP_FULLPATH" ]; then
       truncate -s 0 $SYNC_LOG_FULLPATH
     fi
     echo \$(date +%Y%m%d%H%M%S) >> $SYNC_LOG_FULLPATH
+    rsync -av --delete $SERVER_TIMESTAMP_FULLPATH $LOCAL_TIMESTAMP_FULLPATH >> $SYNC_LOG_FULLPATH
     # Modified by Rafael
     # Add prune cache
-    # rsync -av --delete /moodle/html/moodle /var/www/html >> $SYNC_LOG_FULLPATH
     /etc/init.d/varnish restart
     #***
   fi
