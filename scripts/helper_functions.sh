@@ -74,7 +74,7 @@ function get_setup_params_from_configs_json
     # # export phpVersion=$(echo $json | jq -r .phpProfile.phpVersion)
     # It is not possible to change values after deployment
     # https://github.com/Azure/Moodle/issues/234
-    export phpVersion="8.0"
+    export phpVersion="8.1"
 
     export isMigration=$(echo $json | jq -r .moodleProfile.isMigration)
 }
