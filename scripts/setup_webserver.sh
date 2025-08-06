@@ -516,9 +516,39 @@ EOF
      sudo service nginx restart 
    fi
 
-   # Configure varnish startup for 18.04
-   VARNISHSTART="ExecStart=\/usr\/sbin\/varnishd -j unix,user=vcache -F -a :80 -T localhost:6082 -f \/etc\/varnish\/moodle.vcl -S \/etc\/varnish\/secret -s malloc,4096m -p thread_pool_min=1000 -p thread_pool_max=4000 -p thread_pool_add_delay=0.1 -p timeout_linger=10 -p timeout_idle=30 -p send_timeout=1800 -p thread_pools=2 -p http_max_hdr=512 -p workspace_backend=512k"
-   sed -i "s/^ExecStart.*/${VARNISHSTART}/" /lib/systemd/system/varnish.service
+   # Modified by Rafael Silva - Alfasoft
+   # Changing cache values in Varnish and adding restart in case the service fails
+   # Configure varnish startup for 18.04 and later
+   cat <<EOF >> /lib/systemd/system/varnish.service
+[Unit]
+Description=Varnish Cache, a high-performance HTTP accelerator
+Documentation=https://www.varnish-cache.org/docs/ man:varnishd
+
+[Service]
+Type=simple
+
+# Maximum number of open files (for ulimit -n)
+LimitNOFILE=131072
+
+# Locked shared memory - should suffice to lock the shared memory log
+# (varnishd -l argument)
+# Default log size is 80MB vsl + 1M vsm + header -> 82MB
+# unit is bytes
+LimitMEMLOCK=85983232
+ExecStart=/usr/sbin/varnishd -j unix,user=vcache -F -a :80 -T localhost:6082 -f /etc/varnish/moodle.vcl -S /etc/varnish/secret -s malloc,4096m -p thread_pool_min=500 -p thread_pool_max=2000 -p thread_pool_add_delay=0.1 -p timeout_linger=10 -p timeout_idle=30 -p send_timeout=1800 -p thread_pools=2 -p http_max_hdr=512 -p workspace_backend=512k
+ExecReload=/usr/share/varnish/varnishreload
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+
+Restart=always
+RestartSec=5
+OOMPolicy=continue
+
+[Install]
+WantedBy=multi-user.target
+EOF
 
    # Configure varnish VCL for moodle
    cat <<EOF >> /etc/varnish/moodle.vcl
