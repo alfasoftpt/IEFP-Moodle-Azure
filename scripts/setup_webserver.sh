@@ -519,7 +519,7 @@ EOF
    # Modified by Rafael Silva - Alfasoft
    # Changing cache values in Varnish and adding restart in case the service fails
    # Configure varnish startup for 18.04 and later
-   cat <<EOF >> /lib/systemd/system/varnish.service
+   cat <<EOF > /lib/systemd/system/varnish.service
 [Unit]
 Description=Varnish Cache, a high-performance HTTP accelerator
 Documentation=https://www.varnish-cache.org/docs/ man:varnishd
