@@ -53,10 +53,15 @@ check_fileServerType_param $fileServerType
   set -ex
   echo "### Function Start `date`###"
 
+  # Modified by Rafael
+  # Disabling manual repository installation and performing installation via .deb package
   # add azure-cli repository
-  curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
-  AZ_REPO=$(lsb_release -cs)
-  echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" |  tee /etc/apt/sources.list.d/azure-cli.list
+  # curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
+  # AZ_REPO=$(lsb_release -cs)
+  # echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" |  tee /etc/apt/sources.list.d/azure-cli.list
+  wget --no-check-certificate --header="Host: packages.microsoft.com" https://13.107.213.34/config/ubuntu/22.04/packages-microsoft-prod.deb -O /tmp/packages-microsoft-prod.deb
+  dpkg -i /tmp/packages-microsoft-prod.deb
+  curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
   
   # add PHP-FPM repository 
   add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
@@ -74,7 +79,6 @@ check_fileServerType_param $fileServerType
     -o Dpkg::Options::="--force-confdef" \
     -o Dpkg::Options::="--force-confold" \
     install \
-    azure-cli \
     ca-certificates \
     curl \
     apt-transport-https \
