@@ -178,8 +178,12 @@ EOF
   PhpVer=$(get_php_version)
 
   # Modified by Rafael
-  # Change to NFS with HA  
-  configure_nfs_client_and_mount 192.168.36.134 /moodle /moodle
+  # Change to NFS with HA
+  if [[ "$siteFQDN" == "lb-uzv2k4.northeurope.cloudapp.azure.com" ]]; then
+    configure_nfs_client_and_mount $nfsVmName /moodle /moodle
+  else
+    configure_nfs_client_and_mount 192.168.36.134 /moodle /moodle
+  fi
 
   # Configure syslog to forward
   cat <<EOF >> /etc/rsyslog.conf
