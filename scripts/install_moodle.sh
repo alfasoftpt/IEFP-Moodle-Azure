@@ -341,6 +341,9 @@ http {
   gzip_buffers 16 8k;
   gzip_http_version 1.1;
   gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+
+  # Hide nginx version
+  server_tokens off;
 EOF
 
     if [ "$httpsTermination" != "None" ]; then
@@ -398,6 +401,21 @@ EOF
         location ~ ^/server-status {
             return 404;
         }
+
+    # Filter out vendor directory to prevent access to sensitive files
+    location ^~ /vendor/ {
+        return 404;
+    }
+
+    # Filter out hidden files and directories, except for .well-known
+    location ~ /\.(?!well-known).* {
+        return 404;
+    }
+
+    # Filter out composer.json, composer.lock, package.json, package-lock.json and phpunit.xml
+    location ~ ^/(composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml)$ {
+        return 404;
+    }
 
     location / {
         try_files \$uri \$uri/index.php?\$query_string;
