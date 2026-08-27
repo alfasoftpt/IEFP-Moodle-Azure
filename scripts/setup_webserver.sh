@@ -364,7 +364,9 @@ EOF
 server {
         listen 81 default;
         server_name ${siteFQDN};
-        root ${htmlRootDir};
+
+        # Change required for Moodle 5.1
+        root ${htmlRootDir}/public;
 	index index.php index.html index.htm;
 
         # Log to syslog
